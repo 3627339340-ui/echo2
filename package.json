@@ -4,11 +4,10 @@
   "description": "未来回音 - 智谱AI信件生成器",
   "type": "module",
   "scripts": {
-    "start": "node api/generate.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "axios": "^1.6.0"
   }
 }
-
