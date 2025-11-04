@@ -1,211 +1,96 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>未来回音 ✉️</title>
-    <style>
-        /* 代码二的UI设计 */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+<[HTML全文] 朗="zh">
+<头>
+  <元 字符集="UTF-8" />
+  <元 名字="视窗" 内容="宽度=设备宽度，初始比例=1.0" />
+  <标题>未来回音 ✉️</标题>
+  <风格>
+    身体 {
+      字体系列: “Segoe UI”,无衬线字体;
+      显示:屈;
+      弹性方向:列;
+      对齐项目:中心;
+      对齐内容:中心;
+      高度: 100VH的;
+      背景: 线性渐变(120度, #A1C4FD, #C2E9FB);
+      边缘: 0;
+    }
+    h1 {
+      颜色: #333;
+    }
+    文本区域 {
+      宽度: 90%;
+      最大宽度: 500像素;
+      高度: 120像素;
+      边缘: 12像素 0;
+      填充: 10像素;
+      边界半径: 8像素;
+      边境:没有;
+      字体大小: 16像素;
+      大纲:没有;
+      调整:没有;
+    }
+    按钮 {
+      背景: #4E73DF;
+      颜色:白;
+      填充: 10像素 20像素;
+      边界半径: 8像素;
+      边境:没有;
+      光标:指针;
+      字体大小: 16像素;
+    }
+    按钮:悬停 {
+      背景: #2e59d9;
+    }
+    #输出 {
+      边距顶部: 20像素;
+      宽度: 90%;
+      最大宽度: 500像素;
+      背景:白;
+      填充: 15像素;
+      边界半径: 8像素;
+      盒子阴影: 0 2像素 5像素 RGBA的(0,0,0,0.1);
+      空白:预包装;
+    }
+  </风格>
+</头>
+<身体>
+  <h1>未来回音 ✉️</h1>
+  <文本区域 id="输入" 占 位 符="写下你想对未来说的话..."></文本区域>
+  <按钮 id="发送">发送给未来</按钮>
+  <div id="输出"></div>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
+  <脚本>
+    常量 发送dBtn = 公文.getElementById(“发送”);
+    常量 输入El = 公文.getElementById(“输入”);
+    常量 输出El = 公文.getElementById(“输出”);
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 25px 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            width: 100%;
-            max-width: 500px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+    发送dBtn.addEventListener(“咔嚓”, 异步 () => {
+      常量 输入 = 输入El.价值.修剪();
+      如果 (!输入) {
+        警报("请先写点什么吧。 ");
+        返回;
+      }
 
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 8px;
-            font-size: clamp(1.8rem, 6vw, 2.2rem);
-        }
+      输出El.text内容 = "未来正在回信中... ⏳";
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 25px;
-            font-size: clamp(0.9rem, 4vw, 1rem);
-        }
-
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            font-size: 16px;
-            resize: vertical;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            margin: 12px 0;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 16px 24px;
-            font-size: 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:disabled {
-            background: #ccc;
-            transform: none;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        #output {
-            margin-top: 25px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            animation: fadeIn 0.5s ease;
-            display: none;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px 20px;
-            color: #666;
-            display: none;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-                align-items: flex-start;
-            }
-            
-            .container {
-                padding: 20px 15px;
-                border-radius: 16px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🕒 未来回音 ✉️</h1>
-        <p class="subtitle">写下你想对未来说的话...</p>
-
-        <textarea id="input" placeholder="写下你想对未来说的话..."></textarea>
-
-        <button id="send" class="btn-primary">
-            发送给未来
-        </button>
-
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p>未来正在回信中... ⏳</p>
-        </div>
-
-        <div id="output"></div>
-    </div>
-
-    <script>
-        // 代码一的技术架构
-        const sendBtn = document.getElementById('send');
-        const inputEl = document.getElementById('input');
-        const outputEl = document.getElementById('output');
-        const loadingEl = document.getElementById('loading');
-
-        sendBtn.addEventListener('click', async () => {
-            const input = inputEl.value.trim();
-            if (!input) {
-                alert("请先写点什么吧。");
-                return;
-            }
-
-            // 显示加载状态
-            outputEl.style.display = 'none';
-            loadingEl.style.display = 'block';
-            sendBtn.disabled = true;
-
-            try {
-                const response = await fetch("/api/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ input })
-                });
-
-                const data = await response.json();
-                
-                if (data.answer) {
-                    outputEl.textContent = data.answer;
-                    outputEl.style.display = 'block';
-                } else {
-                    outputEl.textContent = "未来暂时没法回信，请稍后再试。";
-                    outputEl.style.display = 'block';
-                }
-            } catch (error) {
-                outputEl.textContent = "连接未来出错，请稍后再试。";
-                outputEl.style.display = 'block';
-            } finally {
-                loadingEl.style.display = 'none';
-                sendBtn.disabled = false;
-            }
+      尝试 {
+        常量 分辨率 = 等待 获取(“/api/生成”, {
+          方法:“邮政”,
+          头:{ “内容类型”:“应用程序/json” },
+          身体:JSON.字符串化({输入})
         });
-    </script>
-</body>
-</html>
+
+        常量 数据 = 等待 分辨率.json();
+        如果 (数据.答) {
+          输出El.text内容 = 数据.答;
+        } 还 {
+          输出El.text内容 = "未来暂时没法回信，请稍后再试。";
+        }
+      } 抓住 (犯 错) {
+        输出El.text内容 = "连接未来出错，请稍后再试。";
+      }
+    });
+  </脚本>
+</身体>
+</[HTML全文]>
