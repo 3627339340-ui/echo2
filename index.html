@@ -1,97 +1,334 @@
-
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>未来回音 ✉️</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: linear-gradient(120deg, #a1c4fd, #c2e9fb);
-      margin: 0;
-    }
-    h1 {
-      color: #333;
-    }
-    textarea {
-      width: 90%;
-      max-width: 500px;
-      height: 120px;
-      margin: 12px 0;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-      outline: none;
-      resize: none;
-    }
-    button {
-      background: #4e73df;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #2e59d9;
-    }
-    #output {
-      margin-top: 20px;
-      width: 90%;
-      max-width: 500px;
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      white-space: pre-wrap;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>未来回音 ✉️</title>
+    <!-- PWA 支持 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <style>
+        /* 基础重置和字体 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: clamp(1.8rem, 6vw, 2.2rem);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: clamp(0.9rem, 4vw, 1rem);
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin: 12px 0;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        #output {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            animation: fadeIn 0.5s ease;
+            display: none;
+        }
+
+        /* 语音控制样式 */
+        .voice-controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .voice-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .play-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .play-btn:hover {
+            background: #45a049;
+        }
+
+        .stop-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .stop-btn:hover {
+            background: #da190b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px 20px;
+            color: #666;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+            
+            .container {
+                padding: 20px 15px;
+                border-radius: 16px;
+            }
+            
+            .voice-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>未来回音 ✉️</h1>
-  <textarea id="input" placeholder="写下你想对未来说的话..."></textarea>
-  <button id="send">发送给未来</button>
-  <div id="output"></div>
+    <div class="container">
+        <h1>🕒 未来回音 ✉️</h1>
+        <p class="subtitle">写下你想对未来说的话...</p>
 
-  <script>
-    const sendBtn = document.getElementById("send");
-    const inputEl = document.getElementById("input");
-    const outputEl = document.getElementById("output");
+        <textarea id="input" placeholder="写下你想对未来说的话..."></textarea>
 
-    sendBtn.addEventListener("click", async () => {
-      const input = inputEl.value.trim();
-      if (!input) {
-        alert("请先写点什么吧。");
-        return;
-      }
+        <button id="send" class="btn-primary">
+            发送给未来
+        </button>
 
-      outputEl.textContent = "未来正在回信中...⏳";
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>未来正在回信中... ⏳</p>
+        </div>
 
-      try {
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input })
+        <div id="output"></div>
+
+        <!-- 语音控制区域 -->
+        <div id="voiceSection" style="display: none;">
+            <div class="voice-controls">
+                <button class="voice-btn play-btn" onclick="playVoice()">▶️ 播放语音</button>
+                <button class="voice-btn stop-btn" onclick="stopVoice()">⏹️ 停止播放</button>
+            </div>
+            <div style="color: #666; font-size: 13px; margin-top: 8px;">
+                点击"播放语音"聆听未来回音
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 第一个版本的核心功能 ====================
+        const sendBtn = document.getElementById('send');
+        const inputEl = document.getElementById('input');
+        const outputEl = document.getElementById('output');
+        const loadingEl = document.getElementById('loading');
+        const voiceSection = document.getElementById('voiceSection');
+
+        // 语音合成变量
+        let currentSpeech = null;
+        let currentAnswer = '';
+
+        // ==================== 第二个版本的语音系统 ====================
+        function playVoice() {
+            if (!currentAnswer) {
+                alert('暂无内容可播放');
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                stopVoice();
+                
+                currentSpeech = new SpeechSynthesisUtterance(currentAnswer);
+                currentSpeech.lang = 'zh-CN';
+                currentSpeech.rate = 0.9;
+                currentSpeech.pitch = 1.0;
+                currentSpeech.volume = 1.0;
+                
+                // 尝试选择中文语音
+                const voices = speechSynthesis.getVoices();
+                const chineseVoice = voices.find(voice => 
+                    voice.lang.includes('zh') || voice.lang.includes('CN')
+                );
+                if (chineseVoice) {
+                    currentSpeech.voice = chineseVoice;
+                }
+                
+                currentSpeech.onstart = function() {
+                    console.log('语音播放开始');
+                };
+                
+                currentSpeech.onend = function() {
+                    console.log('语音播放结束');
+                };
+                
+                window.speechSynthesis.speak(currentSpeech);
+            } else {
+                alert('您的浏览器不支持语音合成功能');
+            }
+        }
+
+        function stopVoice() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // 预加载语音
+        function preloadVoices() {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.getVoices();
+            }
+        }
+
+        // ==================== 第一个版本的API调用逻辑 ====================
+        sendBtn.addEventListener('click', async () => {
+            const input = inputEl.value.trim();
+            if (!input) {
+                alert("请先写点什么吧。");
+                return;
+            }
+
+            // 显示加载状态
+            outputEl.style.display = 'none';
+            voiceSection.style.display = 'none';
+            loadingEl.style.display = 'block';
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch("/api/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ input })
+                });
+
+                const data = await response.json();
+                
+                if (data.answer) {
+                    currentAnswer = data.answer;
+                    outputEl.textContent = data.answer;
+                    outputEl.style.display = 'block';
+                    voiceSection.style.display = 'block';
+                } else {
+                    outputEl.textContent = "未来暂时没法回信，请稍后再试。";
+                    outputEl.style.display = 'block';
+                }
+            } catch (error) {
+                outputEl.textContent = "连接未来出错，请稍后再试。";
+                outputEl.style.display = 'block';
+            } finally {
+                loadingEl.style.display = 'none';
+                sendBtn.disabled = false;
+            }
         });
 
-        const data = await res.json();
-        if (data.reply) {
-          outputEl.textContent = data.reply;
-        } else {
-          outputEl.textContent = "未来暂时没法回信，请稍后再试。";
-        }
-      } catch (err) {
-        outputEl.textContent = "连接未来出错，请稍后再试。";
-      }
-    });
-  </script>
+        // 页面初始化
+        window.addEventListener('load', function() {
+            preloadVoices();
+        });
+    </script>
 </body>
 </html>
