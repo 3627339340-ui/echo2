@@ -2,14 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>未来回音 ✉️</title>
-    <!-- PWA 支持 -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#667eea">
     <style>
-        /* 基础重置和字体 */
+        /* 代码二的UI设计 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -25,7 +21,6 @@
             align-items: center;
             justify-content: center;
             padding: 15px;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
         }
 
         .container {
@@ -109,42 +104,6 @@
             display: none;
         }
 
-        /* 语音控制样式 */
-        .voice-controls {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .voice-btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            flex: 1;
-        }
-
-        .play-btn {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .play-btn:hover {
-            background: #45a049;
-        }
-
-        .stop-btn {
-            background: #f44336;
-            color: white;
-        }
-
-        .stop-btn:hover {
-            background: #da190b;
-        }
-
         .loading {
             text-align: center;
             padding: 30px 20px;
@@ -172,7 +131,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* 移动端优化 */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -182,10 +140,6 @@
             .container {
                 padding: 20px 15px;
                 border-radius: 16px;
-            }
-            
-            .voice-controls {
-                flex-direction: column;
             }
         }
     </style>
@@ -207,84 +161,15 @@
         </div>
 
         <div id="output"></div>
-
-        <!-- 语音控制区域 -->
-        <div id="voiceSection" style="display: none;">
-            <div class="voice-controls">
-                <button class="voice-btn play-btn" onclick="playVoice()">▶️ 播放语音</button>
-                <button class="voice-btn stop-btn" onclick="stopVoice()">⏹️ 停止播放</button>
-            </div>
-            <div style="color: #666; font-size: 13px; margin-top: 8px;">
-                点击"播放语音"聆听未来回音
-            </div>
-        </div>
     </div>
 
     <script>
-        // ==================== 第一个版本的核心功能 ====================
+        // 代码一的技术架构
         const sendBtn = document.getElementById('send');
         const inputEl = document.getElementById('input');
         const outputEl = document.getElementById('output');
         const loadingEl = document.getElementById('loading');
-        const voiceSection = document.getElementById('voiceSection');
 
-        // 语音合成变量
-        let currentSpeech = null;
-        let currentAnswer = '';
-
-        // ==================== 第二个版本的语音系统 ====================
-        function playVoice() {
-            if (!currentAnswer) {
-                alert('暂无内容可播放');
-                return;
-            }
-
-            if ('speechSynthesis' in window) {
-                stopVoice();
-                
-                currentSpeech = new SpeechSynthesisUtterance(currentAnswer);
-                currentSpeech.lang = 'zh-CN';
-                currentSpeech.rate = 0.9;
-                currentSpeech.pitch = 1.0;
-                currentSpeech.volume = 1.0;
-                
-                // 尝试选择中文语音
-                const voices = speechSynthesis.getVoices();
-                const chineseVoice = voices.find(voice => 
-                    voice.lang.includes('zh') || voice.lang.includes('CN')
-                );
-                if (chineseVoice) {
-                    currentSpeech.voice = chineseVoice;
-                }
-                
-                currentSpeech.onstart = function() {
-                    console.log('语音播放开始');
-                };
-                
-                currentSpeech.onend = function() {
-                    console.log('语音播放结束');
-                };
-                
-                window.speechSynthesis.speak(currentSpeech);
-            } else {
-                alert('您的浏览器不支持语音合成功能');
-            }
-        }
-
-        function stopVoice() {
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
-        }
-
-        // 预加载语音
-        function preloadVoices() {
-            if ('speechSynthesis' in window) {
-                speechSynthesis.getVoices();
-            }
-        }
-
-        // ==================== 第一个版本的API调用逻辑 ====================
         sendBtn.addEventListener('click', async () => {
             const input = inputEl.value.trim();
             if (!input) {
@@ -294,7 +179,6 @@
 
             // 显示加载状态
             outputEl.style.display = 'none';
-            voiceSection.style.display = 'none';
             loadingEl.style.display = 'block';
             sendBtn.disabled = true;
 
@@ -308,10 +192,8 @@
                 const data = await response.json();
                 
                 if (data.answer) {
-                    currentAnswer = data.answer;
                     outputEl.textContent = data.answer;
                     outputEl.style.display = 'block';
-                    voiceSection.style.display = 'block';
                 } else {
                     outputEl.textContent = "未来暂时没法回信，请稍后再试。";
                     outputEl.style.display = 'block';
@@ -323,11 +205,6 @@
                 loadingEl.style.display = 'none';
                 sendBtn.disabled = false;
             }
-        });
-
-        // 页面初始化
-        window.addEventListener('load', function() {
-            preloadVoices();
         });
     </script>
 </body>
